@@ -248,7 +248,6 @@ tracks/1/keys = {
 extents = Vector2( 4.5, 2.5 )
 
 [node name="Player" type="KinematicBody2D"]
-z_index = 2
 collision_mask = 2
 script = ExtResource( 2 )
 speed = 90

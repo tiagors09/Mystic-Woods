@@ -160,7 +160,7 @@ func intance_particle():
 	var particle = PARTICLES.instance()
 	get_tree().root.add_child(particle)
 	particle.global_position = global_position + Vector2(0, 16)
-	particle.z_index = 1
+	particle.z_index = -1
 	particle.play_particles()
 
 func _update_animation(direction):
@@ -186,8 +186,6 @@ func _move():
 	
 	if Input.is_action_just_pressed("attack"):
 		is_attacking = true
-
-	print(is_attacking)
 
 	_update_animation(direction.snapped(Vector2.ONE))
 

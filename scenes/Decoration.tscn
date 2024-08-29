@@ -117,6 +117,7 @@
 7/z_index = 0
 
 [node name="DecorationTerrain" type="TileMap"]
+z_index = -1
 tile_set = SubResource( 1 )
 cell_size = Vector2( 16, 16 )
 collision_layer = 4

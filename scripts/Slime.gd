@@ -6,7 +6,7 @@ onready var slime = get_node(".")
 
 enum { 
 	WALKING_SPEED = 10, 
-	RUN_SPEED = 15,
+	RUN_SPEED = 25,
 }
 
 enum { 
@@ -33,169 +33,224 @@ enum {
 }
 
 var patrol_states = [
-	IDLE_FRONT, 
-	IDLE_BACK, 
-	IDLE_SIDE_LEFT, 
-	IDLE_SIDE_RIGHT, 
-	WALKING_FRONT, 
-	WALKING_BACK, 
-	WALKING_SIDE_RIGHT, 
-	WALKING_SIDE_LEFT
+	ANIMATIONS[IDLE_FRONT], 
+	ANIMATIONS[IDLE_BACK], 
+	ANIMATIONS[IDLE_SIDE_LEFT], 
+	ANIMATIONS[IDLE_SIDE_RIGHT], 
+	ANIMATIONS[WALKING_FRONT], 
+	ANIMATIONS[WALKING_BACK], 
+	ANIMATIONS[WALKING_SIDE_RIGHT], 
+	ANIMATIONS[WALKING_SIDE_LEFT]
 ]
 
-var follow_player
-var last_state
-var current_state
-var speed
+var is_patrolling = true
+var is_following_player = false
+var is_taking_damage = false
+var last_state = null
+var speed = WALKING_SPEED
 var velocity
+var last_direction
+var direction
+var current_state
+
+const WAIT_TIME = 5
 
 var directions = {
-	Vector2.ZERO: IDLE_FRONT,
-	Vector2.UP: RUN_BACK,
-	Vector2.DOWN: RUN_FRONT,
-	Vector2.RIGHT: RUN_SIDE_RIGHT,
-	Vector2.LEFT: RUN_SIDE_LEFT,
-	Vector2(-1,-1): RUN_DIAGONAL_Q2,
-	Vector2(1,-1): RUN_DIAGONAL_Q1,
-	Vector2(-1,1): RUN_DIAGONAL_Q3,
-	Vector2(1,1): RUN_DIAGONAL_Q4,
+	Vector2.ZERO: {
+		"q0": ANIMATIONS[IDLE_FRONT],
+		"q1": ANIMATIONS[RUN_FRONT],
+		"q2": ANIMATIONS[TAKING_DAMAGE_FRONT],
+		"q3": ANIMATIONS[WALKING_FRONT],
+	},
+	Vector2.UP: {
+		"q0": ANIMATIONS[IDLE_BACK],
+		"q1": ANIMATIONS[RUN_BACK],
+		"q2": ANIMATIONS[TAKING_DAMAGE_BACK],
+		"q3": ANIMATIONS[WALKING_BACK],
+	},
+	Vector2.DOWN: {
+		"q0": ANIMATIONS[IDLE_FRONT],
+		"q1": ANIMATIONS[RUN_FRONT],
+		"q2": ANIMATIONS[TAKING_DAMAGE_FRONT],
+		"q3": ANIMATIONS[WALKING_FRONT],
+	},
+	Vector2.RIGHT: {
+		"q0": ANIMATIONS[IDLE_SIDE_RIGHT],
+		"q1": ANIMATIONS[RUN_SIDE_RIGHT],
+		"q2": ANIMATIONS[TAKING_DAMAGE_SIDE_RIGHT],
+		"q3": ANIMATIONS[WALKING_SIDE_RIGHT],
+	},
+	Vector2.LEFT: {
+		"q0": ANIMATIONS[IDLE_SIDE_LEFT],
+		"q1": ANIMATIONS[RUN_SIDE_LEFT],
+		"q2": ANIMATIONS[TAKING_DAMAGE_SIDE_LEFT],
+		"q3": ANIMATIONS[WALKING_SIDE_LEFT],
+	},
+	Vector2(-1,-1): {
+		"q0": ANIMATIONS[IDLE_BACK],
+		"q1": ANIMATIONS[RUN_BACK],
+		"q2": ANIMATIONS[TAKING_DAMAGE_BACK],
+		"q3": ANIMATIONS[WALKING_BACK],
+	},
+	Vector2(1,-1): {
+		"q0": ANIMATIONS[IDLE_BACK],
+		"q1": ANIMATIONS[RUN_BACK],
+		"q2": ANIMATIONS[TAKING_DAMAGE_BACK],
+		"q3": ANIMATIONS[WALKING_BACK],
+	},
+	Vector2(-1,1): {
+		"q0": ANIMATIONS[IDLE_FRONT],
+		"q1": ANIMATIONS[RUN_FRONT],
+		"q2": ANIMATIONS[TAKING_DAMAGE_FRONT],
+		"q3": ANIMATIONS[WALKING_FRONT],
+	},
+	Vector2(1,1): {
+		"q0": ANIMATIONS[IDLE_FRONT],
+		"q1": ANIMATIONS[RUN_FRONT],
+		"q2": ANIMATIONS[TAKING_DAMAGE_FRONT],
+		"q3": ANIMATIONS[WALKING_FRONT],
+	},
 }
 
-var animation = {
+const ANIMATIONS = {
 	IDLE_FRONT: {
 		"name": "idle_front",
 		"flip": false,
-		"direction": Vector2.ZERO,
 	},
 	IDLE_SIDE_LEFT: {
 		"name": "idle_side",
 		"flip": true,
-		"direction": Vector2.ZERO,
 	}, 
 	IDLE_SIDE_RIGHT: {
 		"name": "idle_side",
 		"flip": false,
-		"direction": Vector2.ZERO,
 	},
 	IDLE_BACK: {
 		"name": "idle_back",
 		"flip": false,
-		"direction": Vector2.ZERO
 	},
 	RUN_FRONT: {
 		"name": "run_front",
 		"flip": false,
-		"direction": Vector2.DOWN
 	},
 	RUN_SIDE_LEFT: {
 		"name": "run_side",
 		"flip": true,
-		"direction": Vector2.LEFT
 	}, 
 	RUN_SIDE_RIGHT: {
 		"name": "run_side",
 		"flip": false,
-		"direction": Vector2.RIGHT
 	}, 
 	RUN_BACK: {
 		"name": "run_back",
 		"flip": false,
-		"direction": Vector2.UP
 	},  
 	RUN_DIAGONAL_Q1: {
 		"name": "run_back",
 		"flip": false,
-		"direction": Vector2(1,-1)
 	}, 
 	RUN_DIAGONAL_Q2: {
 		"name": "run_back",
 		"flip": false,
-		"direction": Vector2(-1,-1)
 	}, 
 	RUN_DIAGONAL_Q3: {
 		"name": "run_front",
 		"flip": false,
-		"direction": Vector2(-1,1)
 	},
 	RUN_DIAGONAL_Q4: {
 		"name": "run_front",
 		"flip": false,
-		"direction": Vector2(1,1)
 	},
 	TAKING_DAMAGE_FRONT: {
 		"name": "taking_damage_front",
 		"flip": false,
-		"direction": Vector2.DOWN
 	}, 
 	TAKING_DAMAGE_SIDE_LEFT: {
 		"name": "taking_damage_side",
 		"flip": true,
-		"direction": Vector2.LEFT
 	}, 
 	TAKING_DAMAGE_SIDE_RIGHT: {
 		"name": "taking_damage_side",
 		"flip": false,
-		"direction": Vector2.RIGHT
 	},
 	TAKING_DAMAGE_BACK: {
 		"name": "taking_damage_back",
 		"flip": false,
-		"direction": Vector2.UP
 	}, 
 	WALKING_FRONT: {
 		"name": "walking_front",
 		"flip": false,
-		"direction": Vector2.DOWN
 	}, 
 	WALKING_SIDE_LEFT: {
 		"name": "walking_side",
 		"flip": true,
-		"direction": Vector2.LEFT
 	},
 	WALKING_SIDE_RIGHT: {
 		"name": "walking_side",
 		"flip": false,
-		"direction": Vector2.RIGHT
 	}, 
 	WALKING_BACK: {
 		"name": "walking_back",
 		"flip": false,
-		"direction": Vector2.UP
 	}, 
 }
 
 func _ready():
 	randomize()
-	rand_seed(randi())
+	var _seed = rand_seed(randi())
 	_choose_patrol_pattern()
-	speed = WALKING_SPEED
-	follow_player = false
-
-func _physics_process(_delta):
-	if follow_player:
-		var direction = position.direction_to(Global.player_position).snapped(Vector2.ONE)
-		current_state = directions[direction]
-
-	animated_sprite.play(animation[current_state]["name"])
-	animated_sprite.flip_h = animation[current_state]["flip"]
-	velocity = animation[current_state]["direction"] * speed
-	
-	velocity = move_and_slide(velocity, Vector2.ZERO)
-
-func _on_PlayerDetector_body_entered(_body):
-	follow_player = true
-	speed = RUN_SPEED
-	timer.stop()
-
-func _on_PlayerDetector_body_exited(_body):
-	follow_player = false
-	speed = WALKING_SPEED
-	timer.start(5)
+	_choose_direction()
+	timer.autostart = true
 
 func _choose_patrol_pattern():
-	last_state = current_state
+	patrol_states.shuffle()
 	current_state = patrol_states[randi() % len(patrol_states)]
 
+func _choose_direction():
+	direction = directions.keys()[randi() % len(directions.keys())]
+
+func _move():
+	if is_following_player and not is_patrolling:
+		direction = position.direction_to(Global.player_position).snapped(Vector2.ONE)
+		_update_animation()
+	
+	velocity = speed * direction
+	velocity = move_and_slide(velocity,Vector2.ZERO)
+
+func _update_animation():
+	if direction != Vector2.ZERO and last_direction != direction:
+		last_direction = direction
+	
+	if is_following_player and not is_patrolling:
+		current_state = directions[direction]["q1"]
+	elif not is_following_player and is_patrolling:
+		_choose_patrol_pattern()
+	elif not is_following_player and not is_patrolling:
+		current_state = directions[direction]["q0"]
+	elif is_taking_damage and not is_following_player and not is_patrolling:
+		print('d')
+		current_state = directions[direction]["q2"]
+	
+	animated_sprite.play(current_state["name"])
+	animated_sprite.set_flip_h(current_state["flip"])
+	
+func _physics_process(_delta):
+	_move()
+
+func _on_PlayerDetector_body_entered(_body):
+	timer.stop()
+	speed = RUN_SPEED
+	is_following_player = true
+	is_patrolling = false
+	_update_animation()
+
+func _on_PlayerDetector_body_exited(_body):
+	speed = WALKING_SPEED
+	is_following_player = false
+	is_patrolling = true
+	timer.start(WAIT_TIME)
+	
 func _on_Timer_timeout():
-	_choose_patrol_pattern()
+	_choose_direction()
+	_update_animation()
 

@@ -80,3 +80,4 @@ visibility_mode = 1
 position = Vector2( 328, 136 )
 scale = Vector2( 0.5, 0.5 )
 normal = ExtResource( 12 )
+action = "attack"
