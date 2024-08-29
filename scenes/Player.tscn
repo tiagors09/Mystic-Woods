@@ -21,7 +21,6 @@ tracks/0/keys = {
 [sub_resource type="Animation" id=9]
 resource_name = "attack_back"
 length = 0.4
-loop = true
 tracks/0/type = "value"
 tracks/0/path = NodePath("Sprite:frame")
 tracks/0/interp = 1
@@ -38,7 +37,6 @@ tracks/0/keys = {
 [sub_resource type="Animation" id=10]
 resource_name = "attack_front"
 length = 0.4
-loop = true
 tracks/0/type = "value"
 tracks/0/path = NodePath("Sprite:frame")
 tracks/0/interp = 1
@@ -55,7 +53,6 @@ tracks/0/keys = {
 [sub_resource type="Animation" id=11]
 resource_name = "attack_side"
 length = 0.4
-loop = true
 tracks/0/type = "value"
 tracks/0/path = NodePath("Sprite:frame")
 tracks/0/interp = 1
@@ -288,3 +285,5 @@ drag_margin_h_enabled = true
 drag_margin_v_enabled = true
 smoothing_enabled = true
 editor_draw_drag_margin = true
+
+[connection signal="animation_finished" from="AnimationPlayer" to="." method="_on_AnimationPlayer_animation_finished"]
