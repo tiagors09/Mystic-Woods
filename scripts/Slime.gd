@@ -254,3 +254,5 @@ func _on_Timer_timeout():
 	_choose_direction()
 	_update_animation()
 
+func _on_HurtBox_area_entered(area):
+	position += direction * 20

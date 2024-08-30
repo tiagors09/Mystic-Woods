@@ -4,11 +4,13 @@ const PARTICLES = preload("res://scenes/RunParticles.tscn")
 
 onready var animation_player = get_node("AnimationPlayer")
 onready var sprite = get_node("Sprite")
+onready var hurtbox_collision = get_node("HurtBox/CollisionShape2D")
+onready var timer = get_node("Timer")
 
 export(int) var speed = 60
 
 var velocity = 0
-
+var life = 3
 var is_running = false
 var is_attacking = false
 var current_state = ANIMATIONS[IDLE_FRONT]
@@ -31,6 +33,7 @@ enum {
 	ATTACK_SIDE_LEFT,
 	ATTACK_SIDE_RIGHT,
 	ATTACK_BACK,
+	DIE
 }
 
 const ANIMATIONS = {
@@ -98,6 +101,10 @@ const ANIMATIONS = {
 		"anim_name": "attack_back",
 		"flip": false,
 	},
+	DIE: {
+		"anim_name": "die",
+		"flip": false,
+	}
 }
 
 const DIRECTIONS = {
@@ -105,46 +112,55 @@ const DIRECTIONS = {
 		"q0": ANIMATIONS[IDLE_FRONT],
 		"q1": ANIMATIONS[RUN_FRONT],
 		"q2": ANIMATIONS[ATTACK_FRONT],
+		"q3": ANIMATIONS[DIE],
 	},
 	Vector2.LEFT: {
 		"q0": ANIMATIONS[IDLE_SIDE_LEFT],
 		"q1": ANIMATIONS[RUN_SIDE_LEFT],
 		"q2": ANIMATIONS[ATTACK_SIDE_LEFT],
+		"q3": ANIMATIONS[DIE],
 	},
 	Vector2.RIGHT: {
 		"q0": ANIMATIONS[IDLE_SIDE_RIGHT],
 		"q1": ANIMATIONS[RUN_SIDE_RIGHT],
 		"q2": ANIMATIONS[ATTACK_SIDE_RIGHT],
+		"q3": ANIMATIONS[DIE],
 	},
 	Vector2.UP: {
 		"q0": ANIMATIONS[IDLE_BACK],
 		"q1": ANIMATIONS[RUN_BACK],
 		"q2": ANIMATIONS[ATTACK_BACK],
+		"q3": ANIMATIONS[DIE],
 	},
 	Vector2.DOWN: {
 		"q0": ANIMATIONS[IDLE_FRONT],
 		"q1": ANIMATIONS[RUN_FRONT],
 		"q2": ANIMATIONS[ATTACK_FRONT],
+		"q3": ANIMATIONS[DIE],
 	},
 	Vector2(1, -1): {
 		"q0": ANIMATIONS[IDLE_BACK],
 		"q1": ANIMATIONS[RUN_DIAGONAL_Q1],
 		"q2": ANIMATIONS[ATTACK_BACK],
+		"q3": ANIMATIONS[DIE],
 	},
 	Vector2(-1, -1): {
 		"q0": ANIMATIONS[IDLE_BACK],
 		"q1": ANIMATIONS[RUN_DIAGONAL_Q2],
 		"q2": ANIMATIONS[ATTACK_BACK],
+		"q3": ANIMATIONS[DIE],
 	},
 	Vector2(-1, 1): {
 		"q0": ANIMATIONS[IDLE_FRONT],
 		"q1": ANIMATIONS[RUN_DIAGONAL_Q3],
 		"q2": ANIMATIONS[ATTACK_FRONT],
+		"q3": ANIMATIONS[DIE],
 	},
 	Vector2(1, 1): {
 		"q0": ANIMATIONS[IDLE_FRONT],
 		"q1": ANIMATIONS[RUN_DIAGONAL_Q4],
 		"q2": ANIMATIONS[ATTACK_FRONT],
+		"q3": ANIMATIONS[DIE],
 	}
 }
 
@@ -175,6 +191,8 @@ func _update_animation(direction):
 		current_state = DIRECTIONS[last_direction]['q2']
 	elif not is_attacking and not is_running:
 		current_state = DIRECTIONS[last_direction]['q0']
+	elif not is_running and not is_attacking and life <= 0:
+		current_state = DIRECTIONS[direction]['q3']
 	
 	animation_player.play(current_state["anim_name"])
 	sprite.set_flip_h(current_state["flip"])
@@ -183,6 +201,10 @@ func _move():
 	var direction = Vector2(
 		Input.get_action_strength("ui_right") - Input.get_action_strength("ui_left"), Input.get_action_strength("ui_down") - Input.get_action_strength("ui_up")
 	).normalized()
+	
+	if life <= 0:
+		is_attacking = false
+		is_running = false
 	
 	if Input.is_action_just_pressed("attack"):
 		is_attacking = true
@@ -193,6 +215,15 @@ func _move():
 
 	velocity = move_and_slide(velocity, Vector2.ZERO)
 
+func kill():
+	pass
+
 func _on_AnimationPlayer_animation_finished(anim_name):
 	if anim_name.begins_with("attack_"):
 		is_attacking = false
+
+func _on_HurtBox_area_entered(area):
+	pass
+
+func _on_Sword_area_entered(area):
+	pass
