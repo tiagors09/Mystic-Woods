@@ -224,11 +224,10 @@ func _update_animation():
 	if is_following_player and not is_patrolling:
 		current_state = directions[direction]["q1"]
 	elif not is_following_player and is_patrolling:
-		_choose_patrol_pattern()
+		current_state = directions[direction]["q3"]
 	elif not is_following_player and not is_patrolling:
-		current_state = directions[direction]["q0"]
+		current_state = directions[last_direction]["q0"]
 	elif is_taking_damage and not is_following_player and not is_patrolling:
-		print('d')
 		current_state = directions[direction]["q2"]
 	
 	animated_sprite.play(current_state["name"])
@@ -254,5 +253,5 @@ func _on_Timer_timeout():
 	_choose_direction()
 	_update_animation()
 
-func _on_HurtBox_area_entered(area):
+func _on_HurtBox_area_entered(_area):
 	position += direction * 20
