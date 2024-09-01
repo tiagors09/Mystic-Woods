@@ -1,13 +1,22 @@
-[gd_scene load_steps=3 format=2]
+[gd_scene load_steps=7 format=2]
 
 [ext_resource path="res://scenes/PhysicsObject.tscn" type="PackedScene" id=1]
+[ext_resource path="res://assets/monogram.ttf" type="DynamicFontData" id=2]
+[ext_resource path="res://scripts/Sign.gd" type="Script" id=3]
 
 [sub_resource type="RectangleShape2D" id=1]
 extents = Vector2( 7, 3.5 )
 
+[sub_resource type="CircleShape2D" id=3]
+radius = 16.0312
+
+[sub_resource type="DynamicFont" id=2]
+font_data = ExtResource( 2 )
+
 [node name="Sign" instance=ExtResource( 1 )]
 collision_layer = 8
 collision_mask = 3
+script = ExtResource( 3 )
 
 [node name="CollisionShape2D" parent="." index="0"]
 position = Vector2( 0, 10.5 )
@@ -17,3 +26,29 @@ shape = SubResource( 1 )
 position = Vector2( 0, 6 )
 region_enabled = true
 region_rect = Rect2( 0, 0, 16, 16 )
+
+[node name="Area2D" type="Area2D" parent="." index="2"]
+collision_layer = 128
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Area2D" index="0"]
+position = Vector2( 0, 5 )
+shape = SubResource( 3 )
+
+[node name="RichTextLabel" type="RichTextLabel" parent="." index="3"]
+margin_left = -34.0
+margin_top = -23.0
+margin_right = 52.0
+margin_bottom = -6.0
+custom_fonts/normal_font = SubResource( 2 )
+bbcode_enabled = true
+bbcode_text = "Mate o [shake rate=20.0 level=5 connected=1]slime[/shake]"
+visible_characters = 0
+percent_visible = 0.0
+text = "Mate o slime"
+
+[node name="Timer" type="Timer" parent="RichTextLabel" index="1"]
+wait_time = 0.5
+
+[connection signal="area_entered" from="Area2D" to="." method="_on_Area2D_area_entered"]
+[connection signal="area_exited" from="Area2D" to="." method="_on_Area2D_area_exited"]
+[connection signal="timeout" from="RichTextLabel/Timer" to="." method="_on_Timer_timeout"]
