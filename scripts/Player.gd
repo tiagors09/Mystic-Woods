@@ -222,8 +222,8 @@ func _on_AnimationPlayer_animation_finished(anim_name):
 	if anim_name.begins_with("attack_"):
 		is_attacking = false
 
-func _on_HurtBox_area_entered(area):
+func _on_HurtBox_area_entered(_area):
 	pass
 
-func _on_Sword_area_entered(area):
+func _on_Sword_area_entered(_area):
 	pass
