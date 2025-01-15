@@ -348,7 +348,6 @@ script = ExtResource( 2 )
 [node name="AnimatedSprite" type="AnimatedSprite" parent="."]
 frames = SubResource( 5 )
 animation = "idle_front"
-frame = 1
 playing = true
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
@@ -366,7 +365,7 @@ autostart = true
 
 [node name="HurtBox" type="Area2D" parent="."]
 collision_layer = 64
-collision_mask = 32
+collision_mask = 16
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="HurtBox"]
 shape = SubResource( 69 )

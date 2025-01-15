@@ -46,6 +46,30 @@ position = Vector2( 51, 140 )
 [node name="Slime" parent="YSort" instance=ExtResource( 7 )]
 position = Vector2( 184, 160 )
 
+[node name="Slime2" parent="YSort" instance=ExtResource( 7 )]
+position = Vector2( 119, 136 )
+
+[node name="Slime3" parent="YSort" instance=ExtResource( 7 )]
+position = Vector2( 181, 228 )
+
+[node name="Slime4" parent="YSort" instance=ExtResource( 7 )]
+position = Vector2( 115, 84 )
+
+[node name="Slime5" parent="YSort" instance=ExtResource( 7 )]
+position = Vector2( 185, 28 )
+
+[node name="Slime6" parent="YSort" instance=ExtResource( 7 )]
+position = Vector2( 32, 164 )
+
+[node name="Slime7" parent="YSort" instance=ExtResource( 7 )]
+position = Vector2( 180, 294 )
+
+[node name="Slime8" parent="YSort" instance=ExtResource( 7 )]
+position = Vector2( 301, 164 )
+
+[node name="Slime9" parent="YSort" instance=ExtResource( 7 )]
+position = Vector2( 42, 36 )
+
 [node name="HUD" type="CanvasLayer" parent="."]
 
 [node name="Up" type="TouchScreenButton" parent="HUD"]

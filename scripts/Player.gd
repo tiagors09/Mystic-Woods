@@ -6,6 +6,7 @@ onready var animation_player = get_node("AnimationPlayer")
 onready var sprite = get_node("Sprite")
 onready var hurtbox_collision = get_node("HurtBox/CollisionShape2D")
 onready var timer = get_node("Timer")
+onready var sword = get_node("Sword/CollisionShape2D")
 
 export(int) var speed = 60
 
@@ -15,6 +16,7 @@ var is_running = false
 var is_attacking = false
 var current_state = ANIMATIONS[IDLE_FRONT]
 var last_direction
+var direction
 
 enum {
 	IDLE_FRONT,
@@ -34,6 +36,18 @@ enum {
 	ATTACK_SIDE_RIGHT,
 	ATTACK_BACK,
 	DIE
+}
+
+const SWORD_POSITIONS = {
+	Vector2.ZERO: Vector2.ZERO,
+	Vector2.LEFT: Vector2(-16,8),
+	Vector2.RIGHT: Vector2(16,8),
+	Vector2.UP: Vector2(0,-8),
+	Vector2.DOWN: Vector2(0,24),
+	Vector2(1, -1): Vector2(-16,8),
+	Vector2(-1, -1): Vector2(0,-8),
+	Vector2(-1, 1): Vector2(0,-8),
+	Vector2(1, 1): Vector2(-16,8),
 }
 
 const ANIMATIONS = {
@@ -170,7 +184,12 @@ func _ready():
 
 func _physics_process(_delta):
 	_move()
+	_change_sword_collision()
 	Global.player_position = position
+
+func _change_sword_collision():
+	sword.position = SWORD_POSITIONS[last_direction]
+	pass
 
 func intance_particle():
 	var particle = PARTICLES.instance()
@@ -198,7 +217,7 @@ func _update_animation(direction):
 	sprite.set_flip_h(current_state["flip"])
 
 func _move():
-	var direction = Vector2(
+	direction = Vector2(
 		Input.get_action_strength("ui_right") - Input.get_action_strength("ui_left"), Input.get_action_strength("ui_down") - Input.get_action_strength("ui_up")
 	).normalized()
 	
@@ -208,6 +227,7 @@ func _move():
 	
 	if Input.is_action_just_pressed("attack"):
 		is_attacking = true
+		sword.disabled = false
 
 	_update_animation(direction.snapped(Vector2.ONE))
 
@@ -221,6 +241,7 @@ func kill():
 func _on_AnimationPlayer_animation_finished(anim_name):
 	if anim_name.begins_with("attack_"):
 		is_attacking = false
+		sword.disabled = true
 
 func _on_HurtBox_area_entered(_area):
 	pass

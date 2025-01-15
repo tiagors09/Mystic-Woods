@@ -254,4 +254,5 @@ func _on_Timer_timeout():
 	_update_animation()
 
 func _on_HurtBox_area_entered(_area):
-	position += direction * 20
+	# position += direction * 20
+	queue_free()
